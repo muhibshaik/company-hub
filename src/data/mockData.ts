@@ -1,5 +1,13 @@
 import { CompanyProfile, Job, Applicant, DashboardStats } from '@/types/company';
 
+export const mockRegistrationDetails = {
+  companyName: 'TechVision Solutions Inc.',
+  registeredEmail: 'info@techvision.com',
+  countryCode: '+1',
+  phoneNumber: '415-555-0100',
+  contactPerson: 'Sarah Johnson',
+};
+
 export const mockCompanyProfile: CompanyProfile = {
   id: '1',
   legalName: 'TechVision Solutions Inc.',

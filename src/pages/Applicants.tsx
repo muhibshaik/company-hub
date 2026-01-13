@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import {
   Users,
   Eye,
-  Download,
   Mail,
   Phone,
   Calendar,
@@ -40,7 +39,7 @@ import {
 import { cn } from '@/lib/utils';
 import { mockApplicants, mockJobs } from '@/data/mockData';
 import { Applicant } from '@/types/company';
-import { toast } from '@/hooks/use-toast';
+
 
 const statusColors = {
   New: 'bg-info/10 text-info border-info/20',
@@ -66,12 +65,6 @@ export default function Applicants() {
     return matchesSearch && matchesJob;
   });
 
-  const handleDownloadCV = (applicant: Applicant) => {
-    toast({
-      title: 'Downloading CV',
-      description: `Downloading CV for ${applicant.name}...`,
-    });
-  };
 
   return (
     <DashboardLayout>
@@ -160,24 +153,14 @@ export default function Applicants() {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedApplicant(applicant)}
-                      >
-                        <Eye className="mr-1 h-4 w-4" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadCV(applicant)}
-                      >
-                        <Download className="mr-1 h-4 w-4" />
-                        CV
-                      </Button>
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedApplicant(applicant)}
+                    >
+                      <Eye className="mr-1 h-4 w-4" />
+                      View
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -202,7 +185,7 @@ export default function Applicants() {
             <div>
               <p className="font-medium text-foreground">View-Only Access</p>
               <p className="text-sm text-muted-foreground">
-                As an employer, you can view applicant profiles and download CVs but cannot
+                As an employer, you can view applicant profiles but cannot
                 change application status. Contact the platform administrator for status updates.
               </p>
             </div>
@@ -268,13 +251,9 @@ export default function Applicants() {
                   )}
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end pt-2">
                   <Button variant="outline" onClick={() => setSelectedApplicant(null)}>
                     Close
-                  </Button>
-                  <Button onClick={() => handleDownloadCV(selectedApplicant)}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download CV
                   </Button>
                 </div>
               </div>
