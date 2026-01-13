@@ -9,6 +9,9 @@ import {
   Save,
   X,
   Upload,
+  FileText,
+  Mail,
+  User,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -29,7 +32,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { mockCompanyProfile } from '@/data/mockData';
+import { mockCompanyProfile, mockRegistrationDetails } from '@/data/mockData';
 import { toast } from '@/hooks/use-toast';
 
 const industries = [
@@ -142,8 +145,71 @@ export default function CompanyProfile() {
 
         {/* Profile Sections */}
         <div className="space-y-4">
+          {/* Section 0: Registration Details */}
+          <ProfileSection title="Registration Details" icon={FileText} defaultOpen={true}>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Company Name</Label>
+                <Input
+                  id="companyName"
+                  value={mockRegistrationDetails.companyName}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Auto-filled from registration
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="registeredEmail">Registered Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="registeredEmail"
+                    value={mockRegistrationDetails.registeredEmail}
+                    disabled
+                    className="bg-muted pl-9"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Auto-filled from registration
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="phoneNumber"
+                    value={`${mockRegistrationDetails.countryCode} ${mockRegistrationDetails.phoneNumber}`}
+                    disabled
+                    className="bg-muted pl-9"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Auto-filled from registration
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactPerson">Contact Person</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="contactPerson"
+                    value={mockRegistrationDetails.contactPerson}
+                    disabled
+                    className="bg-muted pl-9"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Auto-filled from registration
+                </p>
+              </div>
+            </div>
+          </ProfileSection>
+
           {/* Section 1: Company Overview */}
-          <ProfileSection title="Company Overview" icon={Building2} defaultOpen={true}>
+          <ProfileSection title="Company Overview" icon={Building2}>
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="legalName">Company Legal Name</Label>
