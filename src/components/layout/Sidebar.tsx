@@ -9,8 +9,14 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -20,78 +26,86 @@ const navItems = [
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
+const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
+
 export function Sidebar() {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return saved === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+  }, [collapsed]);
 
   return (
-    <aside
-      className={cn(
-        'fixed left-0 top-0 z-40 h-screen bg-sidebar transition-all duration-300',
-        collapsed ? 'w-20' : 'w-64'
-      )}
-    >
-      <div className="flex h-full flex-col">
-        {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-          {!collapsed && (
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-                <Briefcase className="h-5 w-5 text-sidebar-primary-foreground" />
-              </div>
-              <span className="text-lg font-semibold text-sidebar-foreground">
-                RecruitHub
-              </span>
-            </div>
-          )}
-          {collapsed && (
-            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
-              <Briefcase className="h-5 w-5 text-sidebar-primary-foreground" />
-            </div>
-          )}
-        </div>
+    <TooltipProvider delayDuration={0}>
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-40 h-screen bg-sidebar transition-all duration-300 ease-in-out',
+          collapsed ? 'w-16' : 'w-64'
+        )}
+      >
+        <div className="flex h-full flex-col">
+          {/* Collapse Toggle Button at Top */}
+          <div className="flex h-16 items-center justify-center border-b border-sidebar-border px-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCollapsed(!collapsed)}
+              className="text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200"
+            >
+              {collapsed ? (
+                <ChevronRight className="h-5 w-5" />
+              ) : (
+                <>
+                  <ChevronLeft className="h-5 w-5 mr-2" />
+                  <span>Collapse</span>
+                </>
+              )}
+            </Button>
+          </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                  isActive
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-muted hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                )}
-              >
-                <item.icon className={cn('h-5 w-5 shrink-0', isActive && 'text-sidebar-primary')} />
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            );
-          })}
-        </nav>
+          {/* Navigation */}
+          <nav className="flex-1 space-y-1 p-2">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              const linkContent = (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                    collapsed && 'justify-center px-2',
+                    isActive
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'text-sidebar-muted hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                  )}
+                >
+                  <item.icon className={cn('h-5 w-5 shrink-0', isActive && 'text-sidebar-primary')} />
+                  {!collapsed && <span>{item.label}</span>}
+                </Link>
+              );
 
-        {/* Collapse Button */}
-        <div className="border-t border-sidebar-border p-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full justify-center text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <>
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                <span>Collapse</span>
-              </>
-            )}
-          </Button>
+              if (collapsed) {
+                return (
+                  <Tooltip key={item.path}>
+                    <TooltipTrigger asChild>
+                      {linkContent}
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="bg-sidebar text-sidebar-foreground border-sidebar-border">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+
+              return linkContent;
+            })}
+          </nav>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </TooltipProvider>
   );
 }
