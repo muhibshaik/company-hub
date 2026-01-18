@@ -119,6 +119,8 @@ export default function CompanyProfile() {
   const [profile, setProfile] = useState(mockCompanyProfile);
   const [selectedBenefits, setSelectedBenefits] = useState<string[]>(profile.benefits);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [registrationPhone, setRegistrationPhone] = useState(`${mockRegistrationDetails.countryCode} ${mockRegistrationDetails.phoneNumber}`);
+  const [registrationContactPerson, setRegistrationContactPerson] = useState(mockRegistrationDetails.contactPerson);
 
   const handleSave = () => {
     setIsEditMode(false);
@@ -180,12 +182,44 @@ export default function CompanyProfile() {
             <div className="grid gap-6 md:grid-cols-2">
               <ReadOnlyField label="Company Name" value={mockRegistrationDetails.companyName} />
               <ReadOnlyField label="Registered Email" value={mockRegistrationDetails.registeredEmail} icon={Mail} />
-              <ReadOnlyField 
-                label="Phone Number" 
-                value={`${mockRegistrationDetails.countryCode} ${mockRegistrationDetails.phoneNumber}`} 
-                icon={Phone} 
-              />
-              <ReadOnlyField label="Contact Person" value={mockRegistrationDetails.contactPerson} icon={User} />
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="registrationPhone">Phone Number</Label>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="registrationPhone"
+                      value={registrationPhone}
+                      onChange={(e) => setRegistrationPhone(e.target.value)}
+                      placeholder="+1 415-555-0100"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <ReadOnlyField 
+                  label="Phone Number" 
+                  value={registrationPhone} 
+                  icon={Phone} 
+                />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="registrationContactPerson">Contact Person</Label>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="registrationContactPerson"
+                      value={registrationContactPerson}
+                      onChange={(e) => setRegistrationContactPerson(e.target.value)}
+                      placeholder="Contact name"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <ReadOnlyField label="Contact Person" value={registrationContactPerson} icon={User} />
+              )}
             </div>
           </ProfileSection>
 
