@@ -12,6 +12,7 @@ import {
   FileText,
   Mail,
   User,
+  Pencil,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -101,15 +102,35 @@ function ProfileSection({ title, icon: Icon, children, defaultOpen = false }: Se
   );
 }
 
+// Read-only text display component
+function ReadOnlyField({ label, value, icon: Icon }: { label: string; value: string; icon?: React.ElementType }) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-muted-foreground text-sm">{label}</Label>
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+        <span className="text-foreground">{value || '-'}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function CompanyProfile() {
   const [profile, setProfile] = useState(mockCompanyProfile);
   const [selectedBenefits, setSelectedBenefits] = useState<string[]>(profile.benefits);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const handleSave = () => {
+    setIsEditMode(false);
     toast({
       title: 'Profile Saved',
       description: 'Your company profile has been updated successfully.',
     });
+  };
+
+  const handleCancel = () => {
+    setIsEditMode(false);
+    setSelectedBenefits(profile.benefits);
   };
 
   const handleBenefitToggle = (benefit: string) => {
@@ -132,14 +153,23 @@ export default function CompanyProfile() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline">
-              <X className="mr-2 h-4 w-4" />
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>
-              <Save className="mr-2 h-4 w-4" />
-              Save Profile
-            </Button>
+            {isEditMode ? (
+              <>
+                <Button variant="outline" onClick={handleCancel}>
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
+                </Button>
+                <Button onClick={handleSave}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Profile
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => setIsEditMode(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
           </div>
         </div>
 
@@ -148,258 +178,293 @@ export default function CompanyProfile() {
           {/* Section 0: Registration Details */}
           <ProfileSection title="Registration Details" icon={FileText} defaultOpen={true}>
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Company Name</Label>
-                <Input
-                  id="companyName"
-                  value={mockRegistrationDetails.companyName}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Auto-filled from registration
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="registeredEmail">Registered Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="registeredEmail"
-                    value={mockRegistrationDetails.registeredEmail}
-                    disabled
-                    className="bg-muted pl-9"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Auto-filled from registration
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="phoneNumber"
-                    value={`${mockRegistrationDetails.countryCode} ${mockRegistrationDetails.phoneNumber}`}
-                    disabled
-                    className="bg-muted pl-9"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Auto-filled from registration
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactPerson">Contact Person</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="contactPerson"
-                    value={mockRegistrationDetails.contactPerson}
-                    disabled
-                    className="bg-muted pl-9"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Auto-filled from registration
-                </p>
-              </div>
+              <ReadOnlyField label="Company Name" value={mockRegistrationDetails.companyName} />
+              <ReadOnlyField label="Registered Email" value={mockRegistrationDetails.registeredEmail} icon={Mail} />
+              <ReadOnlyField 
+                label="Phone Number" 
+                value={`${mockRegistrationDetails.countryCode} ${mockRegistrationDetails.phoneNumber}`} 
+                icon={Phone} 
+              />
+              <ReadOnlyField label="Contact Person" value={mockRegistrationDetails.contactPerson} icon={User} />
             </div>
           </ProfileSection>
 
           {/* Section 1: Company Overview */}
           <ProfileSection title="Company Overview" icon={Building2}>
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="legalName">Company Legal Name</Label>
-                <Input
-                  id="legalName"
-                  value={profile.legalName}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  This field is read-only from registration
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="industry">Industry / Sector</Label>
-                <Select defaultValue={profile.industry}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select industry" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {industries.map((ind) => (
-                      <SelectItem key={ind} value={ind}>
-                        {ind}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companySize">Company Size</Label>
-                <Select defaultValue={profile.companySize}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companySizes.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size} employees
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="foundedYear">Founded Year</Label>
-                <Input
-                  id="foundedYear"
-                  type="number"
-                  defaultValue={profile.foundedYear}
-                  min={1800}
-                  max={new Date().getFullYear()}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="website">Company Website</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  defaultValue={profile.website}
-                  placeholder="https://example.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="businessType">Business Type</Label>
-                <Select defaultValue={profile.businessType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {businessTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <ReadOnlyField label="Company Legal Name" value={profile.legalName} />
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="industry">Industry / Sector</Label>
+                  <Select defaultValue={profile.industry}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {industries.map((ind) => (
+                        <SelectItem key={ind} value={ind}>
+                          {ind}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <ReadOnlyField label="Industry / Sector" value={profile.industry} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="companySize">Company Size</Label>
+                  <Select defaultValue={profile.companySize}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {companySizes.map((size) => (
+                        <SelectItem key={size} value={size}>
+                          {size} employees
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <ReadOnlyField label="Company Size" value={`${profile.companySize} employees`} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="foundedYear">Founded Year</Label>
+                  <Input
+                    id="foundedYear"
+                    type="number"
+                    defaultValue={profile.foundedYear}
+                    min={1800}
+                    max={new Date().getFullYear()}
+                  />
+                </div>
+              ) : (
+                <ReadOnlyField label="Founded Year" value={String(profile.foundedYear)} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="website">Company Website</Label>
+                  <Input
+                    id="website"
+                    type="url"
+                    defaultValue={profile.website}
+                    placeholder="https://example.com"
+                  />
+                </div>
+              ) : (
+                <ReadOnlyField label="Company Website" value={profile.website} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="businessType">Business Type</Label>
+                  <Select defaultValue={profile.businessType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {businessTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <ReadOnlyField label="Business Type" value={profile.businessType} />
+              )}
             </div>
           </ProfileSection>
 
           {/* Section 2: Location & Address */}
           <ProfileSection title="Location & Address" icon={MapPin}>
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <Select defaultValue={profile.country}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
-                <Select defaultValue={profile.state}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {states.map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input id="city" defaultValue={profile.city} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="postalCode">Postal Code</Label>
-                <Input id="postalCode" defaultValue={profile.postalCode} />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="fullAddress">Full Address</Label>
-                <Textarea
-                  id="fullAddress"
-                  defaultValue={profile.fullAddress}
-                  rows={2}
-                />
-              </div>
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Select defaultValue={profile.country}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <ReadOnlyField label="Country" value={profile.country} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Select defaultValue={profile.state}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {states.map((state) => (
+                        <SelectItem key={state} value={state}>
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <ReadOnlyField label="State" value={profile.state} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input id="city" defaultValue={profile.city} />
+                </div>
+              ) : (
+                <ReadOnlyField label="City" value={profile.city} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode">Postal Code</Label>
+                  <Input id="postalCode" defaultValue={profile.postalCode} />
+                </div>
+              ) : (
+                <ReadOnlyField label="Postal Code" value={profile.postalCode} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="fullAddress">Full Address</Label>
+                  <Textarea
+                    id="fullAddress"
+                    defaultValue={profile.fullAddress}
+                    rows={2}
+                  />
+                </div>
+              ) : (
+                <div className="md:col-span-2">
+                  <ReadOnlyField label="Full Address" value={profile.fullAddress} />
+                </div>
+              )}
             </div>
           </ProfileSection>
 
           {/* Section 3: Contact Information */}
           <ProfileSection title="Contact Information" icon={Phone}>
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="hrContactName">HR / Hiring Contact Name</Label>
-                <Input id="hrContactName" defaultValue={profile.hrContactName} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="hrEmail">HR Email</Label>
-                <Input
-                  id="hrEmail"
-                  type="email"
-                  defaultValue={profile.hrEmail}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="hrPhone">HR Phone</Label>
-                <Input id="hrPhone" type="tel" defaultValue={profile.hrPhone} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="department">Department</Label>
-                <Input id="department" defaultValue={profile.department} />
-              </div>
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="hrContactName">HR / Hiring Contact Name</Label>
+                  <Input id="hrContactName" defaultValue={profile.hrContactName} />
+                </div>
+              ) : (
+                <ReadOnlyField label="HR / Hiring Contact Name" value={profile.hrContactName} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="hrEmail">HR Email</Label>
+                  <Input
+                    id="hrEmail"
+                    type="email"
+                    defaultValue={profile.hrEmail}
+                  />
+                </div>
+              ) : (
+                <ReadOnlyField label="HR Email" value={profile.hrEmail} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="hrPhone">HR Phone</Label>
+                  <Input id="hrPhone" type="tel" defaultValue={profile.hrPhone} />
+                </div>
+              ) : (
+                <ReadOnlyField label="HR Phone" value={profile.hrPhone} />
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="department">Department</Label>
+                  <Input id="department" defaultValue={profile.department} />
+                </div>
+              ) : (
+                <ReadOnlyField label="Department" value={profile.department} />
+              )}
             </div>
           </ProfileSection>
 
           {/* Section 4: Benefits & Culture */}
           <ProfileSection title="Benefits & Culture" icon={Gift}>
             <div className="space-y-6">
-              <div className="space-y-3">
-                <Label>Benefits (select all that apply)</Label>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {benefitOptions.map((benefit) => (
-                    <div key={benefit} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={benefit}
-                        checked={selectedBenefits.includes(benefit)}
-                        onCheckedChange={() => handleBenefitToggle(benefit)}
-                      />
-                      <label
-                        htmlFor={benefit}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {benefit}
-                      </label>
-                    </div>
-                  ))}
+              {isEditMode ? (
+                <div className="space-y-3">
+                  <Label>Benefits (select all that apply)</Label>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {benefitOptions.map((benefit) => (
+                      <div key={benefit} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={benefit}
+                          checked={selectedBenefits.includes(benefit)}
+                          onCheckedChange={() => handleBenefitToggle(benefit)}
+                        />
+                        <label
+                          htmlFor={benefit}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {benefit}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="workCulture">Work Culture Description</Label>
-                <Textarea
-                  id="workCulture"
-                  defaultValue={profile.workCultureDescription}
-                  rows={4}
-                  placeholder="Describe your company culture, values, and work environment..."
-                />
-              </div>
+              ) : (
+                <div className="space-y-1">
+                  <Label className="text-muted-foreground text-sm">Benefits</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedBenefits.length > 0 ? (
+                      selectedBenefits.map((benefit) => (
+                        <span
+                          key={benefit}
+                          className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-sm text-primary"
+                        >
+                          {benefit}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-muted-foreground">No benefits listed</span>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {isEditMode ? (
+                <div className="space-y-2">
+                  <Label htmlFor="workCulture">Work Culture Description</Label>
+                  <Textarea
+                    id="workCulture"
+                    defaultValue={profile.workCultureDescription}
+                    rows={4}
+                    placeholder="Describe your company culture, values, and work environment..."
+                  />
+                </div>
+              ) : (
+                <ReadOnlyField label="Work Culture Description" value={profile.workCultureDescription} />
+              )}
             </div>
           </ProfileSection>
 
@@ -421,10 +486,12 @@ export default function CompanyProfile() {
                         <Building2 className="h-8 w-8 text-muted-foreground" />
                       )}
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload Logo
-                    </Button>
+                    {isEditMode && (
+                      <Button variant="outline" size="sm">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Logo
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -443,43 +510,45 @@ export default function CompanyProfile() {
                       </div>
                     )}
                   </div>
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload Cover Image
-                  </Button>
+                  {isEditMode && (
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Cover Image
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
-                  <Input
-                    id="linkedinUrl"
-                    type="url"
-                    defaultValue={profile.linkedinUrl}
-                    placeholder="https://linkedin.com/company/..."
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="websiteUrl">Website URL</Label>
-                  <Input
-                    id="websiteUrl"
-                    type="url"
-                    defaultValue={profile.website}
-                    placeholder="https://example.com"
-                  />
-                </div>
+                {isEditMode ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                    <Input
+                      id="linkedinUrl"
+                      type="url"
+                      defaultValue={profile.linkedinUrl}
+                      placeholder="https://linkedin.com/company/..."
+                    />
+                  </div>
+                ) : (
+                  <ReadOnlyField label="LinkedIn URL" value={profile.linkedinUrl} />
+                )}
+                
+                {isEditMode ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="websiteUrl">Website URL</Label>
+                    <Input
+                      id="websiteUrl"
+                      type="url"
+                      defaultValue={profile.website}
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                ) : (
+                  <ReadOnlyField label="Website URL" value={profile.website} />
+                )}
               </div>
             </div>
           </ProfileSection>
-        </div>
-
-        {/* Bottom Action Bar */}
-        <div className="mt-8 flex justify-end gap-3">
-          <Button variant="outline">Cancel</Button>
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Profile
-          </Button>
         </div>
       </div>
     </DashboardLayout>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Briefcase, Eye, Users, MapPin, Calendar, Search, Lock } from 'lucide-react';
+import { Briefcase, Eye, Users, Search, Lock, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { mockJobs } from '@/data/mockData';
 import { Job } from '@/types/company';
@@ -30,15 +37,21 @@ const statusColors = {
   Draft: 'bg-warning/10 text-warning border-warning/20',
 };
 
+type StatusFilter = 'all' | 'Active' | 'Closed';
+
 export default function MyJobs() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  const filteredJobs = mockJobs.filter(
-    (job) =>
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter out Draft jobs completely, then apply search and status filters
+  const filteredJobs = mockJobs
+    .filter((job) => job.status !== 'Draft')
+    .filter((job) => {
+      const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
 
   return (
     <DashboardLayout>
@@ -58,15 +71,30 @@ export default function MyJobs() {
             </Button>
           </div>
 
-          {/* Search */}
-          <div className="mt-6 relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search jobs..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+          {/* Search and Filter */}
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative max-w-sm flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search jobs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={statusFilter} onValueChange={(value: StatusFilter) => setStatusFilter(value)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -76,10 +104,8 @@ export default function MyJobs() {
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Job Title</TableHead>
-                <TableHead className="font-semibold">Location</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
                 <TableHead className="font-semibold text-center">Applicants</TableHead>
-                <TableHead className="font-semibold">Posted By</TableHead>
                 <TableHead className="font-semibold text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -95,12 +121,6 @@ export default function MyJobs() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      {job.location}
-                    </div>
-                  </TableCell>
-                  <TableCell>
                     <Badge
                       variant="outline"
                       className={cn('font-medium', statusColors[job.status])}
@@ -112,12 +132,6 @@ export default function MyJobs() {
                     <div className="flex items-center justify-center gap-1.5">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{job.applicantCount}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4" />
-                      {job.postedBy}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
@@ -148,7 +162,7 @@ export default function MyJobs() {
               <Briefcase className="h-12 w-12 text-muted-foreground/50" />
               <h3 className="mt-4 text-lg font-semibold">No jobs found</h3>
               <p className="mt-1 text-muted-foreground">
-                Try adjusting your search or wait for admin to post new jobs
+                Try adjusting your search or filter options
               </p>
             </div>
           )}
@@ -178,10 +192,6 @@ export default function MyJobs() {
             {selectedJob && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Location</p>
-                    <p className="font-medium">{selectedJob.location}</p>
-                  </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Status</p>
                     <Badge
