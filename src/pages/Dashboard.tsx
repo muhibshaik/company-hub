@@ -4,7 +4,7 @@ import {
   Briefcase,
   Users,
   Settings,
-  ArrowRight,
+  ArrowUpRight,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
@@ -12,76 +12,80 @@ const menuItems = [
   {
     path: '/company-profile',
     label: 'Company Profile',
-    subtitle: 'Manage your details',
-    description: 'View and manage your company information, branding, and professional details',
+    description: 'Manage branding and professional identity.',
     icon: Building2,
-    gradient: 'bg-gradient-to-r from-emerald-400 to-cyan-500',
+    color: 'emerald',
   },
   {
     path: '/jobs',
     label: 'Job Opportunities',
-    subtitle: 'View posted jobs',
-    description: 'Browse all jobs posted for your company and track applicant activity',
+    description: 'Track active listings and performance.',
     icon: Briefcase,
-    gradient: 'bg-gradient-to-r from-blue-500 to-purple-500',
+    color: 'blue',
   },
   {
     path: '/applicants',
     label: 'Applicants',
-    subtitle: 'Review candidates',
-    description: 'Monitor your job applications, review candidates, and manage recruitment progress',
+    description: 'Review and manage your talent pipeline.',
     icon: Users,
-    gradient: 'bg-gradient-to-r from-purple-500 to-pink-500',
+    color: 'purple',
   },
   {
     path: '/settings',
     label: 'Settings',
-    subtitle: 'Account preferences',
-    description: 'Configure your account settings, notifications, and security preferences',
+    description: 'Account security and notifications.',
     icon: Settings,
-    gradient: 'bg-gradient-to-r from-orange-400 to-red-500',
+    color: 'rose',
   },
 ];
+
+const colorVariants: Record<string, string> = {
+  emerald: 'bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white',
+  blue: 'bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white',
+  purple: 'bg-purple-500/10 text-purple-600 group-hover:bg-purple-500 group-hover:text-white',
+  rose: 'bg-rose-500/10 text-rose-600 group-hover:bg-rose-500 group-hover:text-white',
+};
 
 export default function Dashboard() {
   return (
     <DashboardLayout>
-      <div className="animate-fade-in">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Welcome Back!</h1>
-          <p className="mt-1 text-muted-foreground">
-            Access all your recruitment tools and information from one central dashboard
-          </p>
-        </div>
+      <div className="max-w-6xl mx-auto p-4 md:p-8 animate-in fade-in duration-500">
+        {/* Header Section */}
+        <header className="mb-12">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+            Welcome back <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">TechVision</span>
+          </h1>
+          <p className="text-slate-500 mt-2 text-lg">What would you like to handle first today?</p>
+        </header>
 
-        {/* Menu Tiles Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
+        {/* Action Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {menuItems.map((item) => (
-            <Link key={item.path} to={item.path} className="group">
-              <div className="h-full overflow-hidden rounded-2xl bg-card shadow-sm border border-border/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                {/* Gradient Header */}
-                <div className={`${item.gradient} p-5`}>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-                    <item.icon className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="mt-3 text-lg font-semibold text-white">
-                    {item.label}
-                  </h3>
-                  <p className="text-sm text-white/80">{item.subtitle}</p>
-                </div>
-
-                {/* White Content Area */}
-                <div className="bg-card p-5">
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.description}
-                  </p>
-                  <div className="mt-4 flex items-center text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                    Click to access
-                    <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </div>
+            <Link 
+              key={item.path} 
+              to={item.path} 
+              className="group relative p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-2"
+            >
+              {/* Corner Icon */}
+              <div className="absolute top-6 right-6 text-slate-300 group-hover:text-slate-900 group-hover:rotate-45 transition-all">
+                <ArrowUpRight size={20} />
               </div>
+
+              {/* Icon Circle */}
+              <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-6 transition-all duration-300 ${colorVariants[item.color]}`}>
+                <item.icon size={28} />
+              </div>
+
+              {/* Content */}
+              <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight">
+                {item.label}
+              </h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                {item.description}
+              </p>
+
+              {/* Bottom Decorative Element */}
+              <div className="mt-6 w-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-500 rounded-full" />
             </Link>
           ))}
         </div>
